@@ -1,0 +1,18 @@
+FROM python:3.6
+
+RUN pip3 install --no-cache-dir -U uwsgi
+
+ENV UWSGI_WSGI=broccoli.wsgi:app \
+    UWSGI_HTTP=:8080 \
+    UWSGI_PROCESSES=4 \
+    UWSGI_THREADS=2 \
+    UWSGI_UID=daemon \
+    UWSGI_GID=daemon
+
+RUN mkdir -p /app
+COPY . /app
+WORKDIR /app
+
+RUN pip3 install --no-cache-dir -U .[uwsgi]
+
+CMD ["uwsgi", "--master", "--need-app"]

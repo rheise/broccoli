@@ -1,0 +1,60 @@
+version: '3'
+services:
+    rabbitmq:
+        build:
+            context: .
+            dockerfile: Dockerfile-rabbitmq
+        environment:
+            RABBITMQ_ERLANG_COOKIE: RABBITMQ_ERLANG_COOKIE
+        hostname:
+            rabbitmq-host
+        ports:
+            - "4369:4369"
+            - "5671:5671"
+            - "5672:5672"
+            - "25672:25672"
+            - "15671:15671"
+            - "15672:15672"
+        volumes:
+            - "~/docker_volumes/broccoli/rabbitmq:/var/lib/rabbitmq"
+    redis:
+        command:
+            redis-server --appendonly yes
+        image:
+            redis
+        # ports:
+        #     - "16379:6379"
+        volumes:
+            - "~/docker_volumes/broccoli/redis:/data"
+    wsgi:
+        build:
+            context: .
+            dockerfile: Dockerfile-uwsgi
+        depends_on:
+            - worker
+        ports:
+            - "8888:8080"
+    worker:
+        build:
+            context: .
+            dockerfile: Dockerfile-worker
+        depends_on:
+            - rabbitmq
+            - redis
+        deploy:
+            replicas: 2
+        user: nobody
+    flower:
+        build:
+            context: .
+            dockerfile: Dockerfile-flower
+        depends_on:
+            - worker
+        ports:
+            - "5555:5555"
+    beat:
+        build:
+            context: .
+            dockerfile: Dockerfile-beat
+        depends_on:
+            - worker

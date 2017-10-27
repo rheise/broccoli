@@ -8,6 +8,9 @@ setup(
         'celery[redis]>=4.1,<4.2',
     ],
     extras_require={
+        'flower': [
+            'flower'
+        ],
         'worker': [
         ],
         'uwsgi': [
